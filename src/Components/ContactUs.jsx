@@ -10,11 +10,7 @@ const ContactUs = () => {
   const contactRef = useRef(null);
   const contactInView = useInView(contactRef, { once: true, amount: 0.1 });
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [statusMessage, setStatusMessage] = useState("");
   const [statusType, setStatusType] = useState(""); // "success" or "error"
   const [backendStatus, setBackendStatus] = useState(""); // health check
@@ -25,7 +21,6 @@ const ContactUs = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const res = await fetch("https://vaughan-backend.onrender.com/send-email", {
         method: "POST",
@@ -35,21 +30,25 @@ const ContactUs = () => {
 
       const data = await res.json();
 
-      setStatusMessage(data.message);
-      setStatusType("success");
-      setFormData({ name: "", email: "", message: "" });
+      if (res.ok) {
+        setStatusMessage(data.message);
+        setStatusType("success");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        setStatusMessage(data.message || "Failed to send email.");
+        setStatusType("error");
+      }
 
-      setTimeout(() => setStatusMessage(""), 3000);
+      setTimeout(() => setStatusMessage(""), 5000); // hide after 5s
     } catch (err) {
       setStatusMessage("Failed to send email. Try again!");
       setStatusType("error");
-
-      setTimeout(() => setStatusMessage(""), 3000);
+      setTimeout(() => setStatusMessage(""), 5000);
       console.error(err);
     }
   };
 
-  // Optional: check backend health on component mount
+  // Check backend health on mount
   useEffect(() => {
     fetch("https://vaughan-backend.onrender.com/healthz")
       .then((res) => res.text())
@@ -58,22 +57,17 @@ const ContactUs = () => {
   }, []);
 
   return (
-    <div
-      id="contact"
-      className="min-h-screen bg-gray-900 text-white overflow-hidden hover:cursor-pointer"
-    >
-      <section
-        ref={contactRef}
-        className="py-16 sm:py-24 px-6 sm:px-10 lg:px-16"
-      >
+    <div id="contact" className="min-h-screen bg-gray-900 text-white overflow-hidden">
+      <section ref={contactRef} className="py-16 sm:py-24 px-6 sm:px-10 lg:px-16">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+
           {/* Left Side — Contact Info */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={contactInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-6">
+            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6">
               Ready to Start Your Project?
             </h2>
 
@@ -84,23 +78,15 @@ const ContactUs = () => {
 
             <div className="space-y-6">
               <div className="flex items-start sm:items-center space-x-4">
-                <FaEnvelope
-                  className="text-2xl flex-shrink-0"
-                  style={{ color: GOLD_ACCENT }}
-                />
+                <FaEnvelope className="text-2xl flex-shrink-0" style={{ color: GOLD_ACCENT }} />
                 <div>
                   <h4 className="font-semibold text-gray-200">Email Us</h4>
-                  <p className="text-gray-400">
-                    info@vaughanelectricalexperts.ca
-                  </p>
+                  <p className="text-gray-400">info@vaughanelectricalexperts.ca</p>
                 </div>
               </div>
 
               <div className="flex items-start sm:items-center space-x-4">
-                <FaPhone
-                  className="text-2xl flex-shrink-0"
-                  style={{ color: GOLD_ACCENT }}
-                />
+                <FaPhone className="text-2xl flex-shrink-0" style={{ color: GOLD_ACCENT }} />
                 <div>
                   <h4 className="font-semibold text-gray-200">Call Us</h4>
                   <p className="text-gray-400">+1 (437) 981-0224 (Canada)</p>
@@ -108,10 +94,7 @@ const ContactUs = () => {
               </div>
 
               <div className="flex items-start space-x-4">
-                <FaMapMarkerAlt
-                  className="text-2xl mt-1 flex-shrink-0"
-                  style={{ color: GOLD_ACCENT }}
-                />
+                <FaMapMarkerAlt className="text-2xl mt-1 flex-shrink-0" style={{ color: GOLD_ACCENT }} />
                 <div>
                   <h4 className="font-semibold text-gray-200">Our Location</h4>
                   <p className="text-gray-400 max-w-xs sm:max-w-sm">
@@ -135,18 +118,13 @@ const ContactUs = () => {
             transition={{ duration: 1, delay: 0.4 }}
             className="bg-gray-800 p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl"
           >
-            <h3
-              className="text-2xl sm:text-3xl font-bold mb-6"
-              style={{ color: GOLD_ACCENT }}
-            >
+            <h3 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: GOLD_ACCENT }}>
               Send Us a Message
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-300 mb-1">
-                  Full Name
-                </label>
+                <label className="block text-sm sm:text-base font-medium text-gray-300 mb-1">Full Name</label>
                 <input
                   type="text"
                   name="name"
@@ -161,9 +139,7 @@ const ContactUs = () => {
               </div>
 
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-300 mb-1">
-                  Email
-                </label>
+                <label className="block text-sm sm:text-base font-medium text-gray-300 mb-1">Email</label>
                 <input
                   type="email"
                   name="email"
@@ -178,9 +154,7 @@ const ContactUs = () => {
               </div>
 
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-300 mb-1">
-                  Your Project Details
-                </label>
+                <label className="block text-sm sm:text-base font-medium text-gray-300 mb-1">Your Project Details</label>
                 <textarea
                   name="message"
                   rows="4"
@@ -195,13 +169,9 @@ const ContactUs = () => {
               </div>
 
               {statusMessage && (
-                <div
-                  className={`px-4 py-2 rounded mb-3 text-sm ${
-                    statusType === "success"
-                      ? "bg-green-500 text-white"
-                      : "bg-red-500 text-white"
-                  }`}
-                >
+                <div className={`px-4 py-2 rounded mb-3 text-sm ${
+                  statusType === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                }`}>
                   {statusMessage}
                 </div>
               )}
