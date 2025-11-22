@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 
@@ -9,6 +9,7 @@ const GOLD_HOVER = "#E5AE00";
 const ContactUs = () => {
   const contactRef = useRef(null);
   const contactInView = useInView(contactRef, { once: true, amount: 0.1 });
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,6 +17,7 @@ const ContactUs = () => {
   });
   const [statusMessage, setStatusMessage] = useState("");
   const [statusType, setStatusType] = useState(""); // "success" or "error"
+  const [backendStatus, setBackendStatus] = useState(""); // health check
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,7 +27,7 @@ const ContactUs = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/send-email", {
+      const res = await fetch("https://vaughan-backend.onrender.com/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -37,7 +39,6 @@ const ContactUs = () => {
       setStatusType("success");
       setFormData({ name: "", email: "", message: "" });
 
-      // Hide message after 3 seconds
       setTimeout(() => setStatusMessage(""), 3000);
     } catch (err) {
       setStatusMessage("Failed to send email. Try again!");
@@ -47,6 +48,14 @@ const ContactUs = () => {
       console.error(err);
     }
   };
+
+  // Optional: check backend health on component mount
+  useEffect(() => {
+    fetch("https://vaughan-backend.onrender.com/healthz")
+      .then((res) => res.text())
+      .then((data) => setBackendStatus(data))
+      .catch(() => setBackendStatus("Backend not reachable"));
+  }, []);
 
   return (
     <div
@@ -81,7 +90,9 @@ const ContactUs = () => {
                 />
                 <div>
                   <h4 className="font-semibold text-gray-200">Email Us</h4>
-                  <p className="text-gray-400">info@vaughanelectricalexperts.ca</p>
+                  <p className="text-gray-400">
+                    info@vaughanelectricalexperts.ca
+                  </p>
                 </div>
               </div>
 
@@ -108,6 +119,12 @@ const ContactUs = () => {
                   </p>
                 </div>
               </div>
+
+              {backendStatus && (
+                <p className="mt-4 text-sm text-gray-400">
+                  Backend status: {backendStatus}
+                </p>
+              )}
             </div>
           </motion.div>
 
